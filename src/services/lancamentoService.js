@@ -22,9 +22,9 @@ export const getLancamento = async (lancamentoId) => {
     }
 }
 
-export const getLancamentosByUsuario = async (usuarioId) => {
+export const getLancamentosByUsuario = async () => {
     try {
-        const response = await apiClient.get(`${API_ENDPOINT}/usuario/${usuarioId}`);
+        const response = await apiClient.get(`${API_ENDPOINT}/usuario/`);
         return response.data;
     } catch (error) {
         console.error("Error fetching lancamentos by usuario:", error);
