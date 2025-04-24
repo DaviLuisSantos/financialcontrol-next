@@ -1,26 +1,239 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
+  --current-line: #F2F2F2;
+  --comment: #646464;
+  --primary-color: #007AFF;
+  --secondary-color: #F2F2F2;
+  --accent-color: #03dac6;
+  --text-principal-color: #1A1A1A;
+  --text-secondary-color: #2A282F;
+  --book-author-color: #646464;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: #282a36;
+  --foreground: #f8f8f2;
+  --current-line: #44475a;
+  --comment: #6272a4;
+  --primary-color: #bb86fc;
+  --secondary-color: #1f1f1f;
+  --accent-color: #50fa7b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+h2 {
+  color: var(--foreground);
+
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
+  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+p {
+  color: var(--foreground);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+input {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+select {
+  background-color: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+#button {
+  background-color: var(--primary-color);
+  color: var(--current-line);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.dark #button {
+  color: var(--foreground);
+}
+
+#button:hover {
+  background-color: var(--accent-color);
+}
+
+#modal {
+  background-color: var(--current-line);
+}
+
+#bar {
+  background-color: var(--current-line);
+  color: var(--foreground)
+}
+
+#book-info {
+  background-color: var(--secondary-color);
+}
+
+#book-title {
+  color: var(--foreground);
+}
+
+#book-author {
+  color: var(--comment);
+}
+
+#genre {
+  background-color: var(--primary-color);
+}
+
+#book-card {
+  border-color: var(--current-line);
+  background-color: var(--secondary-color);
+}
+
+#date {
+  color: var(--comment)
+}
+
+/*
+button {
+  background-color: var(--primary-color);
+  color: var(--foreground);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--accent-color);
+}
+
+header {
+  background: var(--primary-color);
+  padding: 1rem;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+header nav ul li a {
+  color: var(--foreground);
+  font-weight: bold;
+}
+
+footer {
+  background: var(--secondary-color);
+  text-align: center;
+  padding: 1rem;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
+
+/* Form Styles 
+form {
+  background: var(--secondary-color);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--foreground);
+  border-radius: 4px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Card Styles 
+.card {
+  background: var(--secondary-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--foreground);
+}
+
+.card-description {
+  color: var(--foreground);
+  margin-top: 0.5rem;
+}
+
+/* Modal Styles 
+.modal {
+  background: var(--secondary-color);
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--foreground);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--accent-color);
+}
+
+.modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  color: var(--foreground);
+}
+*/
