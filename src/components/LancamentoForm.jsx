@@ -1,13 +1,17 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { getCategoriasByUsuario } from '@/services/categoriaService';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export default function LancamentoForm({ onCriar }) {
+    const { user } = useContext(AuthContext);
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
     const [data, setData] = useState('');
     const [categoria, setCategoria] = useState('');
+    const [tipo, setTipo] = useState('');
     const [categorias, setCategorias] = useState([]);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchCategorias = async () => {
@@ -16,6 +20,7 @@ export default function LancamentoForm({ onCriar }) {
                 setCategorias(data || []);
             } catch (error) {
                 console.error('Erro ao buscar categorias:', error);
+                setError('Não foi possível carregar as categorias.');
             }
         };
 
@@ -24,13 +29,26 @@ export default function LancamentoForm({ onCriar }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (descricao && valor && data && categoria) {
-            onCriar({ descricao, valor: parseFloat(valor), data, categoria });
-            setDescricao('');
-            setValor('');
-            setData('');
-            setCategoria('');
+        if (!descricao || !valor || !data || !categoria || !tipo) {
+            setError('Todos os campos são obrigatórios.');
+            return;
         }
+
+        onCriar({
+            valor: parseFloat(valor),
+            descricao,
+            data,
+            categoriaId: parseInt(categoria),
+            tipo: parseInt(tipo),
+        });
+
+        // Limpar os campos após o envio
+        setDescricao('');
+        setValor('');
+        setData('');
+        setCategoria('');
+        setTipo('');
+        setError('');
     };
 
     return (
@@ -38,9 +56,10 @@ export default function LancamentoForm({ onCriar }) {
             onSubmit={handleSubmit}
             className="mb-6 grid md:grid-cols-3 gap-6 p-6 bg-gradient-to-r from-[#3b3b4f] to-[#44475a] rounded-lg shadow-lg"
         >
+            {error && <p className="col-span-full text-red-500">{error}</p>}
             <input
                 type="text"
-                placeholder="Descrição"
+                placeholder="Descrição do lançamento"
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
@@ -48,7 +67,7 @@ export default function LancamentoForm({ onCriar }) {
             />
             <input
                 type="number"
-                placeholder="Valor"
+                placeholder="Valor (ex: 100.00)"
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
                 className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
@@ -75,6 +94,18 @@ export default function LancamentoForm({ onCriar }) {
                         {cat.nome}
                     </option>
                 ))}
+            </select>
+            <select
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value)}
+                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
+                required
+            >
+                <option value="" disabled>
+                    Tipo de lançamento
+                </option>
+                <option value="0">Despesa</option>
+                <option value="1">Receita</option>
             </select>
             <button
                 type="submit"

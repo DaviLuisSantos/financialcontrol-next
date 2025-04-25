@@ -2,8 +2,7 @@
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import Layout from '../components/Layout';
-import InfoCard from '@/components/InfoCard';
+import { ReusableCard } from '@/components/Card';
 import { getToken } from '@/utils/auth';
 import { Pie, Line } from 'react-chartjs-2';
 import { BarChartComponent } from '@/components/bar-chart';
@@ -75,57 +74,75 @@ export default function DashboardPage() {
   };
 
   return (
-      <div>
-        <h1 className="text-3xl font-bold mb-6 text-[#f8f8f2]">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-auto pb-2">
-          <InfoCard title="Total de Categorias" value="12" />
-          <InfoCard title="Lançamentos no mês" value="R$ 4.500" />
-          <InfoCard title="Saldo Atual" value="R$ 2.250" color="#50fa7b" />
+    <div>
+      <h1 className="text-3xl font-bold mb-6 text-[#f8f8f2]">Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-auto pb-2">
+        <ReusableCard
+          title="Total de Categorias"
+          description="Categorias cadastradas"
+          value="12"
+          badgeText="Atualizado"
+          footerText="Última atualização: Hoje"
+        />
+        <ReusableCard
+          title="Lançamentos no mês"
+          description="Total de lançamentos"
+          value="R$ 4.500"
+          badgeText="+10%"
+          footerText="Comparado ao mês anterior"
+        />
+        <ReusableCard
+          title="Saldo Atual"
+          description="Saldo disponível"
+          value="R$ 2.250"
+          badgeText="Estável"
+          footerText="Nenhuma alteração significativa"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
+          <h2 className="text-lg font-semibold mb-4 text-[#bd93f9]">Despesas por Categoria</h2>
+          <Pie data={pieData} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-            <h2 className="text-lg font-semibold mb-4 text-[#bd93f9]">Despesas por Categoria</h2>
-            <Pie data={pieData} />
-          </div>
+        <BarChartComponent
+          title="Lançamentos Mensais"
+          description="Valores mensais de lançamentos"
+          data={barData}
+          dataKey="value"
+          xAxisKey="label"
+          color="#bd93f9"
+          footerText="Dados atualizados"
+          footerSubtext="Período: Jan - Jun"
+        />
 
-            <BarChartComponent
-              title="Lançamentos Mensais"
-              description="Valores mensais de lançamentos"
-              data={barData}
-              dataKey="value"
-              xAxisKey="label"
-              color="#bd93f9"
-              footerText="Dados atualizados"
-              footerSubtext="Período: Jan - Jun"
-            />
-
-          <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-            <h2 className="text-lg font-semibold mb-4 text-[#ff79c6]">Saldo Semanal</h2>
-            <Line data={lineData} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-            <h2 className="text-lg font-semibold mb-4">Categoria com Maior Custo</h2>
-            <p>Alimentação - R$ 500</p>
-          </div>
-
-          <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-            <h2 className="text-lg font-semibold mb-4">Categoria com Maior Lucro</h2>
-            <p>Educação - R$ 400</p>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2] mt-6">
-          <h2 className="text-lg font-semibold mb-4">Últimos Lançamentos</h2>
-          <ul className="space-y-2">
-            <li>Compra de supermercado - R$ 200 (Alimentação)</li>
-            <li>Mensalidade da academia - R$ 150 (Saúde)</li>
-            <li>Venda de produto - R$ 300 (Outros)</li>
-          </ul>
+        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
+          <h2 className="text-lg font-semibold mb-4 text-[#ff79c6]">Saldo Semanal</h2>
+          <Line data={lineData} />
         </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
+          <h2 className="text-lg font-semibold mb-4">Categoria com Maior Custo</h2>
+          <p>Alimentação - R$ 500</p>
+        </div>
+
+        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
+          <h2 className="text-lg font-semibold mb-4">Categoria com Maior Lucro</h2>
+          <p>Educação - R$ 400</p>
+        </div>
+      </div>
+
+      <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2] mt-6">
+        <h2 className="text-lg font-semibold mb-4">Últimos Lançamentos</h2>
+        <ul className="space-y-2">
+          <li>Compra de supermercado - R$ 200 (Alimentação)</li>
+          <li>Mensalidade da academia - R$ 150 (Saúde)</li>
+          <li>Venda de produto - R$ 300 (Outros)</li>
+        </ul>
+      </div>
+    </div>
   );
 }
