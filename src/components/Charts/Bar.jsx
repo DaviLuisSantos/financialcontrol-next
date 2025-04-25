@@ -30,19 +30,23 @@ export function BarChartComponent({
     footerSubtext = "",
 }) {
     return (
-        <Card>
+        <Card className="flex flex-col h-full">
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
                 <CardDescription>{description}</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={{ [dataKey]: { label: title, color } }}>
+            <CardContent className="flex-1 flex items-center justify-center">
+                <ChartContainer
+                    config={{ [dataKey]: { label: title, color } }}
+                    className="w-full h-full"
+                >
                     <BarChart
                         accessibilityLayer
                         data={data}
                         margin={{
                             top: 20,
                         }}
+                        className="w-full h-full"
                     >
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -67,16 +71,20 @@ export function BarChartComponent({
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    {footerText} {footerIcon}
-                </div>
-                {footerSubtext && (
-                    <div className="leading-none text-muted-foreground">
-                        {footerSubtext}
-                    </div>
-                )}
-            </CardFooter>
+            {(footerText || footerSubtext) && (
+                <CardFooter className="flex-col gap-2 text-sm">
+                    {footerText && (
+                        <div className="flex items-center gap-2 font-medium leading-none">
+                            {footerText} {footerIcon}
+                        </div>
+                    )}
+                    {footerSubtext && (
+                        <div className="leading-none text-muted-foreground">
+                            {footerSubtext}
+                        </div>
+                    )}
+                </CardFooter>
+            )}
         </Card>
     );
 }

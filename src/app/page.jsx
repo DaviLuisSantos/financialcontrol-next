@@ -1,11 +1,13 @@
 'use client';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ReusableCard } from '@/components/Card';
+import { ReusablePieChart } from '@/components/Charts/Pie'; // Importando o novo componente reutilizável
+import { BarChartComponent } from '@/components/Charts/Bar';
 import { getToken } from '@/utils/auth';
-import { Pie, Line } from 'react-chartjs-2';
-import { BarChartComponent } from '@/components/bar-chart';
+import { getMonthInfos } from '@/services/dashboardService';
+import { Line } from 'react-chartjs-2';
 
 // Registrar os elementos necessários do Chart.js
 import {
@@ -33,32 +35,61 @@ export default function DashboardPage() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
 
+  const [monthInfos, setMonthInfos] = useState({
+    totalEntries: 0,
+    totalExits: 0,
+    currentBalance: 0,
+    entriesChange: '',
+    exitsChange: '',
+    balanceChange: '',
+  });
+
+  const [barData, setBarData] = useState([]); // Estado para os dados do gráfico de barras
+  const [pieData, setPieData] = useState([]); // Estado para os dados do gráfico de pizza
+
   useEffect(() => {
     if (!user && !getToken()) {
       router.push('/login');
     }
   }, [user]);
 
-  // Dados para os gráficos
-  const pieData = {
-    labels: ['Alimentação', 'Transporte', 'Lazer', 'Educação', 'Outros'],
-    datasets: [
-      {
-        data: [500, 300, 200, 400, 100],
-        backgroundColor: ['#ff79c6', '#50fa7b', '#bd93f9', '#ffb86c', '#8be9fd'],
-        borderWidth: 1,
-      },
-    ],
+  // Função para buscar os dados do mês
+  const fetchMonthInfos = async () => {
+    try {
+      const response = await getMonthInfos();
+      console.log('Dados do mês:', response);
+
+      // Atualizar os dados do mês
+      setMonthInfos({
+        totalEntries: response.receita?.total || 0,
+        totalExits: response.despesa?.total || 0,
+        currentBalance: response.saldo?.total || 0,
+        entriesChange: response.receita?.diferenca || 0,
+        exitsChange: response.despesa?.diferenca || 0,
+        balanceChange: response.saldo?.diferenca || 0,
+      });
+
+      // Atualizar os dados do gráfico de barras
+      const formattedBarData = response.saldoMensal?.map((item) => ({
+        label: item.mes,
+        value: item.valor,
+      })) || [];
+      setBarData(formattedBarData);
+
+      // Atualizar os dados do gráfico de pizza
+      const formattedPieData = response.categoriasMensais?.map((item) => ({
+        name: item.categoria,
+        value: item.valor,
+      })) || [];
+      setPieData(formattedPieData);
+    } catch (error) {
+      console.error('Erro ao buscar dados do mês:', error);
+    }
   };
 
-  const barData = [
-    { label: 'Jan', value: 1200 },
-    { label: 'Fev', value: 1500 },
-    { label: 'Mar', value: 800 },
-    { label: 'Abr', value: 1700 },
-    { label: 'Mai', value: 900 },
-    { label: 'Jun', value: 1300 },
-  ];
+  useEffect(() => {
+    fetchMonthInfos();
+  }, []);
 
   const lineData = {
     labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
@@ -78,43 +109,48 @@ export default function DashboardPage() {
       <h1 className="text-3xl font-bold mb-6 text-[#f8f8f2]">Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-auto pb-2">
         <ReusableCard
-          title="Total de Categorias"
-          description="Categorias cadastradas"
-          value="12"
-          badgeText="Atualizado"
-          footerText="Última atualização: Hoje"
+          title="Total de Entradas"
+          description="Entradas no mês"
+          value={`R$ ${monthInfos.totalEntries}`}
+          badgeText={monthInfos.entriesChange}
+          footerText="Comparado ao mês anterior"
         />
         <ReusableCard
-          title="Lançamentos no mês"
-          description="Total de lançamentos"
-          value="R$ 4.500"
-          badgeText="+10%"
+          title="Total de Saídas"
+          description="Saídas no mês"
+          value={`R$ ${monthInfos.totalExits}`}
+          badgeText={monthInfos.exitsChange}
           footerText="Comparado ao mês anterior"
         />
         <ReusableCard
           title="Saldo Atual"
           description="Saldo disponível"
-          value="R$ 2.250"
-          badgeText="Estável"
+          value={`R$ ${monthInfos.currentBalance}`}
+          badgeText={monthInfos.balanceChange}
           footerText="Nenhuma alteração significativa"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-          <h2 className="text-lg font-semibold mb-4 text-[#bd93f9]">Despesas por Categoria</h2>
-          <Pie data={pieData} />
-        </div>
+        <ReusablePieChart
+          title="Despesas por Categoria"
+          description="Distribuição das despesas do mês"
+          data={pieData} // Dados dinâmicos do gráfico de pizza
+          dataKey="value"
+          nameKey="name"
+          footerText="Dados atualizados"
+          footerSubtext="Baseado nas categorias do mês"
+        />
 
         <BarChartComponent
           title="Lançamentos Mensais"
           description="Valores mensais de lançamentos"
-          data={barData}
+          data={barData} // Dados dinâmicos do gráfico de barras
           dataKey="value"
           xAxisKey="label"
           color="#bd93f9"
           footerText="Dados atualizados"
-          footerSubtext="Período: Jan - Jun"
+          footerSubtext="Período: Últimos meses"
         />
 
         <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
