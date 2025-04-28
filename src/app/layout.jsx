@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DashProvider } from "@/contexts/DashboardContext";
 import { ThemeProvider } from "next-themes";
 import Layout from "@/components/Layout";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -28,13 +29,15 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
         <AuthProvider>
+          <DashProvider>
           <SidebarProvider>
             <AppSidebar />
             <main className="flex-1 p-6 md:p-8 lg:p-10 bg-gradient-to-r from-[#1e1e28] to-[#282a36] rounded-lg shadow-lg">
               <SidebarTrigger />
               <div className="max-w-7xl mx-auto">{children}</div>
             </main>
-          </SidebarProvider>
+            </SidebarProvider>
+            </DashProvider>
         </AuthProvider>
       </body>
     </html>

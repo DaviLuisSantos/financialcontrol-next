@@ -14,7 +14,7 @@ export function ReusableCard({
     value,
     badgeText,
     badgeIcon: BadgeIcon,
-    footerText,
+    footerText = "Comparado ao mês anterior",
     footerIcon: FooterIcon,
 }) {
     // Determinar o ícone de tendência e formatar o badgeText
@@ -23,8 +23,8 @@ export function ReusableCard({
     const TrendIcon = isPositive
         ? TrendingUpIcon
         : isNegative
-        ? TrendingDownIcon
-        : null;
+            ? TrendingDownIcon
+            : null;
 
     const formattedBadgeText = isPositive
         ? `+${badgeText}%`
@@ -34,8 +34,8 @@ export function ReusableCard({
     const badgeColorClass = isPositive
         ? "text-green-500 border-green-500"
         : isNegative
-        ? "text-red-500 border-red-500"
-        : "text-gray-500 border-gray-500";
+            ? "text-red-500 border-red-500"
+            : "text-gray-500 border-gray-500";
 
     return (
         <Card className="@container/card">

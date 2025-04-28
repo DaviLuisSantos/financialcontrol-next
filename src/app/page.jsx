@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useEffect, useState } from 'react';
+import { use, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ReusableCard } from '@/components/Card';
@@ -7,6 +7,7 @@ import { ReusablePieChart } from '@/components/Charts/Pie'; // Importando o novo
 import { BarChartComponent } from '@/components/Charts/Bar';
 import { getToken } from '@/utils/auth';
 import { getMonthInfos } from '@/services/dashboardService';
+import { DashContext } from '@/contexts/DashboardContext';
 import { Line } from 'react-chartjs-2';
 
 // Registrar os elementos necessários do Chart.js
@@ -33,16 +34,9 @@ ChartJS.register(
 
 export default function DashboardPage() {
   const { user } = useContext(AuthContext);
+  const { monthInfos } = useContext(DashContext);
   const router = useRouter();
 
-  const [monthInfos, setMonthInfos] = useState({
-    totalEntries: 0,
-    totalExits: 0,
-    currentBalance: 0,
-    entriesChange: '',
-    exitsChange: '',
-    balanceChange: '',
-  });
 
   const [barData, setBarData] = useState([]); // Estado para os dados do gráfico de barras
   const [pieData, setPieData] = useState([]); // Estado para os dados do gráfico de pizza
@@ -53,43 +47,26 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  // Função para buscar os dados do mês
-  const fetchMonthInfos = async () => {
-    try {
-      const response = await getMonthInfos();
-      console.log('Dados do mês:', response);
-
-      // Atualizar os dados do mês
-      setMonthInfos({
-        totalEntries: response.receita?.total || 0,
-        totalExits: response.despesa?.total || 0,
-        currentBalance: response.saldo?.total || 0,
-        entriesChange: response.receita?.diferenca || 0,
-        exitsChange: response.despesa?.diferenca || 0,
-        balanceChange: response.saldo?.diferenca || 0,
-      });
-
-      // Atualizar os dados do gráfico de barras
-      const formattedBarData = response.saldoMensal?.map((item) => ({
-        label: item.mes,
-        value: item.valor,
-      })) || [];
-      setBarData(formattedBarData);
-
-      // Atualizar os dados do gráfico de pizza
-      const formattedPieData = response.categoriasMensais?.map((item) => ({
-        name: item.categoria,
-        value: item.valor,
-      })) || [];
-      setPieData(formattedPieData);
-    } catch (error) {
-      console.error('Erro ao buscar dados do mês:', error);
-    }
-  };
 
   useEffect(() => {
-    fetchMonthInfos();
-  }, []);
+    if (monthInfos.monthBalance.length === 0) return;
+    const formattedBarData = monthInfos.monthBalance?.map((item) => ({
+      label: item.mes,
+      value: item.valor,
+    })) || [];
+    setBarData(formattedBarData);
+  }, [monthInfos.monthBalance]);
+
+
+  useEffect(() => {
+    if (monthInfos.monthCategories.length === 0) return;
+    const formattedPieData = monthInfos.monthCategories?.map((item) => ({
+      name: item.categoria,
+      value: item.valor,
+    })) || [];
+    setPieData(formattedPieData);
+  }, [monthInfos.monthCategories]);
+
 
   const lineData = {
     labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
@@ -113,21 +90,18 @@ export default function DashboardPage() {
           description="Entradas no mês"
           value={`R$ ${monthInfos.totalEntries}`}
           badgeText={monthInfos.entriesChange}
-          footerText="Comparado ao mês anterior"
         />
         <ReusableCard
           title="Total de Saídas"
           description="Saídas no mês"
           value={`R$ ${monthInfos.totalExits}`}
           badgeText={monthInfos.exitsChange}
-          footerText="Comparado ao mês anterior"
         />
         <ReusableCard
           title="Saldo Atual"
           description="Saldo disponível"
           value={`R$ ${monthInfos.currentBalance}`}
           badgeText={monthInfos.balanceChange}
-          footerText="Nenhuma alteração significativa"
         />
       </div>
 
