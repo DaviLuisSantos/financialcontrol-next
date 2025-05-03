@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 
 import {
@@ -17,10 +17,11 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Badge } from "@/components/ui/badge";
 
 export function BarChartComponent({
     title = "Bar Chart",
-    description = "Chart Description",
+    description = "",
     data = [],
     dataKey = "value",
     xAxisKey = "label",
@@ -28,12 +29,45 @@ export function BarChartComponent({
     footerText = "Showing data for the selected period",
     footerIcon = <TrendingUp className="h-4 w-4" />,
     footerSubtext = "",
+    decimalVariation = "0.00", // Nova prop para variação decimal
+    percentageVariation = "0%", // Nova prop para variação percentual
 }) {
+    const isPositive = parseFloat(decimalVariation) >= 0;
+
     return (
         <Card className="flex flex-col h-full">
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+                <div className="flex flex-col gap-2">
+                    <CardTitle className="text-lg font-bold">{title}</CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                        {description}
+                        <div className="flex items-center gap-4 ">
+                            <Badge
+                                variant={isPositive ? "success" : "destructive"}
+                                className="text-xs px-2 py-0.5" // Tamanho reduzido
+                            >
+                                {isPositive ? (
+                                    <TrendingUp className="h-4 w-4 mr-1" />
+                                ) : (
+                                    <TrendingDown className="h-4 w-4 mr-1" />
+                                )}
+                                {decimalVariation}
+                            </Badge>
+                            <Badge
+                                variant={isPositive ? "success" : "destructive"}
+                                className="text-xs px-2 py-0.5" // Tamanho reduzido
+                            >
+                                {isPositive ? (
+                                    <TrendingUp className="h-4 w-4 mr-1" />
+                                ) : (
+                                    <TrendingDown className="h-4 w-4 mr-1" />
+                                )}
+                                {percentageVariation}
+                            </Badge>
+                        </div>
+                    </CardDescription>
+                </div>
+
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center">
                 <ChartContainer

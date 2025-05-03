@@ -1,36 +1,66 @@
 'use client';
-import { useState } from "react";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const FormSchema = z.object({
+    nome: z.string().min(1, { message: "O nome da categoria é obrigatório." }),
+});
 
 export default function CategoriaForm({ onSubmit, categoria }) {
-    const [nome, setNome] = useState(categoria?.nome || "");
+    const form = useForm({
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            nome: categoria?.nome || "",
+        },
+    });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (nome.trim()) {
-            onSubmit({ nome });
-            setNome("");
-        }
+    const handleSubmit = (data) => {
+        onSubmit(data);
+        form.reset();
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="mb-6 flex flex-col space-y-4 p-6 shadow-lg rounded-lg bg-gradient-to-r from-[#3b3b4f] to-[#44475a]"
-        >
-            <input
-                type="text"
-                value={nome}
-                placeholder="Digite o nome da categoria"
-                onChange={(e) => setNome(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-            />
-            <button
-                id="button"
-                type="submit"
-                className="text-[#282a36] px-4 py-2 rounded-md font-semibold hover:from-[#6272a4] hover:to-[#505c7a] hover:text-white transition-all duration-300 shadow-md"
+        <Form {...form}>
+            <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="mb-6 flex flex-col space-y-4 p-6 shadow-lg rounded-lg bg-gradient-to-r from-[#3b3b4f] to-[#44475a]"
             >
-                Adicionar Categoria
-            </button>
-        </form>
+                <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nome da Categoria</FormLabel>
+                            <FormControl>
+                                <Input
+                                    placeholder="Digite o nome da categoria"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button
+                    type="submit"
+                    id="button"
+                >
+                    Adicionar Categoria
+                </Button>
+            </form>
+        </Form>
     );
 }

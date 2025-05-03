@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 import { getCategoriasByUsuario } from "@/services/categoriaService";
 import { createLancamento, getLancamentosByUsuario } from "@/services/lancamentoService";
@@ -28,10 +31,11 @@ const FormSchema = z.object({
     tipo: z.enum(["0", "1"], { message: "Selecione o tipo de lançamento." }),
 });
 
-export default function LancamentoForm({ onCriar }) {
+export default function LancamentoForm({ onSubmit }) {
     const [categorias, setCategorias] = useState([]);
-    const [categoriaSelecionada, setCategoriaSelecionada] = useState(""); // Estado para controlar a categoria selecionada
+    const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -47,11 +51,14 @@ export default function LancamentoForm({ onCriar }) {
     useEffect(() => {
         const fetchCategorias = async () => {
             try {
+                setIsLoading(true);
                 const data = await getCategoriasByUsuario();
                 setCategorias(data || []);
             } catch (error) {
                 console.error("Erro ao buscar categorias:", error);
                 setError("Não foi possível carregar as categorias.");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -60,35 +67,38 @@ export default function LancamentoForm({ onCriar }) {
 
     const handleCriar = async (dados) => {
         try {
-            const ok = await createLancamento(dados);
+            setIsLoading(true);
+            const ok = await createLancamento({
+                ...dados,
+                categoriaId: parseInt(dados.categoria),
+                tipo: parseInt(dados.tipo),
+            });
             if (ok) {
                 const data = await getLancamentosByUsuario();
-                if (onCriar) {
-                    onCriar(data);
+                if (onSubmit) {
+                    onSubmit();
                 }
             }
         } catch (error) {
             console.error("Erro ao criar lançamento:", error);
             setError("Não foi possível criar o lançamento.");
+        } finally {
+            setIsLoading(false);
         }
     };
-
-    function onSubmit(data) {
-        handleCriar({
-            ...data,
-            valor: parseFloat(data.valor),
-            categoriaId: parseInt(data.categoria),
-            tipo: parseInt(data.tipo),
-        });
-    }
 
     return (
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(handleCriar)}
                 className="grid grid-cols-1 gap-4 lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]"
             >
-                {error && <p className="col-span-full text-red-500">{error}</p>}
+                {error && (
+                    <Alert variant="destructive" className="col-span-full">
+                        <AlertTitle>Erro</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
                 <FormField
                     control={form.control}
                     name="descricao"
@@ -133,10 +143,10 @@ export default function LancamentoForm({ onCriar }) {
                     <FormControl>
                         <Select
                             onValueChange={(value) => {
-                                setCategoriaSelecionada(value); // Atualiza o estado local
-                                form.setValue("categoria", value); // Atualiza o estado do formulário
+                                setCategoriaSelecionada(value);
+                                form.setValue("categoria", value);
                             }}
-                            value={categoriaSelecionada} // Vincula ao estado local
+                            value={categoriaSelecionada}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecione uma categoria" />
@@ -173,8 +183,9 @@ export default function LancamentoForm({ onCriar }) {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="col-span-full">
-                    Adicionar
+                <Separator className="my-4" />
+                <Button type="submit" className="col-span-full" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Adicionar"}
                 </Button>
             </form>
         </Form>

@@ -1,32 +1,41 @@
-import React from 'react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function CategoriaList({ categorias, isLoading }) {
     return (
-        <ul className="rounded-lg shadow-lg p-4 bg-gradient-to-r from-[#3b3b4f] to-[#44475a] mt-4">
+        <div className="mt-4 rounded-lg shadow-lg p-4 bg-gradient-to-r from-[#3b3b4f] to-[#44475a]">
             {isLoading ? (
-                <li className="text-[#f8f8f2] text-center py-4 animate-pulse">
-                    Carregando categorias...
-                </li>
+                <Alert variant="default" className="animate-pulse">
+                    <AlertTitle>Carregando...</AlertTitle>
+                    <AlertDescription>Carregando categorias...</AlertDescription>
+                </Alert>
             ) : categorias.length > 0 ? (
-                categorias.map((categoria) => (
-                    <li
-                        key={categoria.id}
-                        className="flex justify-between items-center p-3 mb-2 bg-[#282a36] rounded-lg hover:bg-[#343746] transition-all duration-200 shadow-md"
-                    >
-                        <span className="text-[#f8f8f2] font-medium">{categoria.nome}</span>
-                        <button
-                            className="px-3 py-1 text-sm font-semibold text-white bg-[#ff5555] rounded-md hover:bg-[#ff6b6b] transition-all duration-200"
-                            onClick={() => alert(`Excluir categoria: ${categoria.nome}`)} // Substitua por lógica real
+                <ul className="space-y-2">
+                    {categorias.map((categoria) => (
+                        <li
+                            key={categoria.id}
+                            className="flex justify-between items-center p-3 bg-[#282a36] rounded-lg hover:bg-[#343746] transition-all duration-200 shadow-md"
                         >
-                            Excluir
-                        </button>
-                    </li>
-                ))
+                            <span className="text-[#f8f8f2] font-medium">{categoria.nome}</span>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => alert(`Excluir categoria: ${categoria.nome}`)} // Substitua por lógica real
+                            >
+                                Excluir
+                            </Button>
+                        </li>
+                    ))}
+                </ul>
             ) : (
-                <li className="text-[#f8f8f2] text-center py-4">
-                    Nenhuma categoria encontrada.
-                </li>
+                <Alert variant="default">
+                    <AlertTitle>Nenhuma categoria encontrada</AlertTitle>
+                    <AlertDescription>
+                        Não há categorias cadastradas no momento.
+                    </AlertDescription>
+                </Alert>
             )}
-        </ul>
+        </div>
     );
 }
