@@ -1,17 +1,48 @@
 'use client';
-import { useState, useEffect, useContext } from 'react';
-import { getCategoriasByUsuario } from '@/services/categoriaService';
-import { AuthContext } from '@/contexts/AuthContext';
+
+import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+import { getCategoriasByUsuario } from "@/services/categoriaService";
+import { createLancamento, getLancamentosByUsuario } from "@/services/lancamentoService";
+
+const FormSchema = z.object({
+    descricao: z.string().min(1, { message: "Descrição é obrigatória." }),
+    valor: z.string().regex(/^\d+(\.\d{1,2})?$/, { message: "Insira um valor válido." }),
+    data: z.string().min(1, { message: "A data é obrigatória." }),
+    categoria: z.string().min(1, { message: "Selecione uma categoria." }),
+    tipo: z.enum(["0", "1"], { message: "Selecione o tipo de lançamento." }),
+});
 
 export default function LancamentoForm({ onCriar }) {
-    const { user } = useContext(AuthContext);
-    const [descricao, setDescricao] = useState('');
-    const [valor, setValor] = useState('');
-    const [data, setData] = useState('');
-    const [categoria, setCategoria] = useState('');
-    const [tipo, setTipo] = useState('');
     const [categorias, setCategorias] = useState([]);
-    const [error, setError] = useState('');
+    const [categoriaSelecionada, setCategoriaSelecionada] = useState(""); // Estado para controlar a categoria selecionada
+    const [error, setError] = useState("");
+
+    const form = useForm({
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            descricao: "",
+            valor: "",
+            data: "",
+            categoria: "",
+            tipo: "",
+        },
+    });
 
     useEffect(() => {
         const fetchCategorias = async () => {
@@ -19,100 +50,133 @@ export default function LancamentoForm({ onCriar }) {
                 const data = await getCategoriasByUsuario();
                 setCategorias(data || []);
             } catch (error) {
-                console.error('Erro ao buscar categorias:', error);
-                setError('Não foi possível carregar as categorias.');
+                console.error("Erro ao buscar categorias:", error);
+                setError("Não foi possível carregar as categorias.");
             }
         };
 
         fetchCategorias();
     }, []);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!descricao || !valor || !data || !categoria || !tipo) {
-            setError('Todos os campos são obrigatórios.');
-            return;
+    const handleCriar = async (dados) => {
+        try {
+            const ok = await createLancamento(dados);
+            if (ok) {
+                const data = await getLancamentosByUsuario();
+                if (onCriar) {
+                    onCriar(data);
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao criar lançamento:", error);
+            setError("Não foi possível criar o lançamento.");
         }
-
-        onCriar({
-            valor: parseFloat(valor),
-            descricao,
-            data,
-            categoriaId: parseInt(categoria),
-            tipo: parseInt(tipo),
-        });
-
-        // Limpar os campos após o envio
-        setDescricao('');
-        setValor('');
-        setData('');
-        setCategoria('');
-        setTipo('');
-        setError('');
     };
 
+    function onSubmit(data) {
+        handleCriar({
+            ...data,
+            valor: parseFloat(data.valor),
+            categoriaId: parseInt(data.categoria),
+            tipo: parseInt(data.tipo),
+        });
+    }
+
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="mb-6 grid md:grid-cols-3 gap-6 p-6 bg-gradient-to-r from-[#3b3b4f] to-[#44475a] rounded-lg shadow-lg"
-        >
-            {error && <p className="col-span-full text-red-500">{error}</p>}
-            <input
-                type="text"
-                placeholder="Descrição do lançamento"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-                required
-            />
-            <input
-                type="number"
-                placeholder="Valor (ex: 100.00)"
-                value={valor}
-                onChange={(e) => setValor(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-                required
-            />
-            <input
-                type="date"
-                value={data}
-                onChange={(e) => setData(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-                required
-            />
-            <select
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-                required
+        <Form {...form}>
+            <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid grid-cols-1 gap-4 lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]"
             >
-                <option value="" disabled>
-                    Selecione uma categoria
-                </option>
-                {categorias.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                        {cat.nome}
-                    </option>
-                ))}
-            </select>
-            <select
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value)}
-                className="p-3 border border-transparent rounded-md bg-[#282a36] text-[#f8f8f2] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#bd93f9] focus:border-[#bd93f9] transition-all duration-300"
-                required
-            >
-                <option value="" disabled>
-                    Tipo de lançamento
-                </option>
-                <option value="0">Despesa</option>
-                <option value="1">Receita</option>
-            </select>
-            <button
-                type="submit"
-                className="col-span-full md:col-span-1 bg-gradient-to-r from-[#50fa7b] to-[#3be97a] text-[#282a36] px-4 py-3 rounded-md font-semibold hover:from-[#6272a4] hover:to-[#505c7a] hover:text-white transition-all duration-300 shadow-md"
-            >
-                Adicionar
-            </button>
-        </form>
+                {error && <p className="col-span-full text-red-500">{error}</p>}
+                <FormField
+                    control={form.control}
+                    name="descricao"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Descrição</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Descrição do lançamento" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="valor"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Valor</FormLabel>
+                            <FormControl>
+                                <Input type="text" placeholder="100.00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="data"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Data</FormLabel>
+                            <FormControl>
+                                <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormItem>
+                    <FormLabel>Categoria</FormLabel>
+                    <FormControl>
+                        <Select
+                            onValueChange={(value) => {
+                                setCategoriaSelecionada(value); // Atualiza o estado local
+                                form.setValue("categoria", value); // Atualiza o estado do formulário
+                            }}
+                            value={categoriaSelecionada} // Vincula ao estado local
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione uma categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {categorias.map((cat) => (
+                                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                                        {cat.nome}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                <FormField
+                    control={form.control}
+                    name="tipo"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tipo</FormLabel>
+                            <FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o tipo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="0">Despesa</SelectItem>
+                                        <SelectItem value="1">Receita</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="col-span-full">
+                    Adicionar
+                </Button>
+            </form>
+        </Form>
     );
 }

@@ -7,6 +7,8 @@ import { ReusablePieChart } from '@/components/Charts/Pie'; // Importando o novo
 import { BarChartComponent } from '@/components/Charts/Bar';
 import { getToken } from '@/utils/auth';
 import { getMonthInfos } from '@/services/dashboardService';
+import { ButtonDemo } from '@/components/Button';
+import { DialogDemo } from '@/components/Modal'
 import { DashContext } from '@/contexts/DashboardContext';
 import { Line } from 'react-chartjs-2';
 
@@ -83,7 +85,11 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-[#f8f8f2]">Dashboard</h1>
+      <div className='flex flex-row items-start justify-between mb-6'>
+        <h1 className="text-3xl font-bold mb-6 text-[#f8f8f2]">Dashboard</h1>
+        <DialogDemo
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-auto pb-2">
         <ReusableCard
           title="Total de Entradas"

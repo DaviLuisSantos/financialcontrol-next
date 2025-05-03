@@ -30,14 +30,14 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <DashProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="flex-1 p-6 md:p-8 lg:p-10 bg-gradient-to-r from-[#1e1e28] to-[#282a36] rounded-lg shadow-lg">
-              <SidebarTrigger />
-              <div className="max-w-7xl mx-auto">{children}</div>
-            </main>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex-1 p-6 md:p-8 lg:p-10 bg-gradient-to-r from-[#1e1e28] to-[#282a36] shadow-lg">
+                <SidebarTrigger />
+                <div className="max-w-7xl mx-auto">{children}</div>
+              </main>
             </SidebarProvider>
-            </DashProvider>
+          </DashProvider>
         </AuthProvider>
       </body>
     </html>
