@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [barData, setBarData] = useState([]);
+  const [chartConfig, setChartConfig] = useState({});
   const [pieData, setPieData] = useState([]);
   const [barChartTitle, setBarChartTitle] = useState('');
   const [barChartDescription, setBarChartDescription] = useState('');
@@ -51,15 +52,35 @@ export default function DashboardPage() {
   useEffect(() => {
     if (monthInfos.monthBalance.length === 0) return;
 
-    const formattedBarData = monthInfos.monthBalance?.map((item) => ({
-      label: item.mes,
-      value: item.valor,
-    })) || [];
+    // Formatar os dados para o gráfico de barras
+    const formattedBarData = monthInfos.monthBalance.map((item) => ({
+      mes: item.mes,
+      entrada: item.entrada,
+      saida: item.saida,
+      saldo: item.saldo,
+    }));
     setBarData(formattedBarData);
 
+    // Configurar as cores e rótulos das barras
+    setChartConfig({
+      entrada: {
+        label: "Entradas",
+        color: "#4caf50",
+      },
+      saida: {
+        label: "Saídas",
+        color: "#f44336",
+      },
+      saldo: {
+        label: "Saldo",
+        color: "#2196f3",
+      },
+    });
+
+    // Calcular variações para o título e descrição
     if (monthInfos.monthBalance.length > 1) {
-      const lastMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 1].valor;
-      const previousMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 2].valor;
+      const lastMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 1].saldo;
+      const previousMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 2].saldo;
       const decimalDifference = (lastMonth - previousMonth).toFixed(2);
       const percentageDifference = ((decimalDifference / previousMonth) * 100).toFixed(2);
 
@@ -103,6 +124,12 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Resumo Financeiro</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ReusableCard
+            title="Saldo Atual"
+            description="Saldo disponível"
+            value={`R$ ${monthInfos.currentBalance}`}
+            badgeText={monthInfos.balanceChange}
+          />
+          <ReusableCard
             title="Total de Entradas"
             description="Entradas no mês"
             value={`R$ ${monthInfos.totalEntries}`}
@@ -113,12 +140,6 @@ export default function DashboardPage() {
             description="Saídas no mês"
             value={`R$ ${monthInfos.totalExits}`}
             badgeText={monthInfos.exitsChange}
-          />
-          <ReusableCard
-            title="Saldo Atual"
-            description="Saldo disponível"
-            value={`R$ ${monthInfos.currentBalance}`}
-            badgeText={monthInfos.balanceChange}
           />
         </div>
       </section>
@@ -138,10 +159,10 @@ export default function DashboardPage() {
           />
           <BarChartComponent
             title="Lançamentos Mensais"
+            description="Entradas, Saídas e Saldo"
             data={barData}
-            dataKey="value"
-            xAxisKey="label"
-            color="#bd93f9"
+            config={chartConfig}
+            xAxisKey="mes"
             footerText="Dados atualizados"
             footerSubtext="Período: Últimos meses"
             decimalVariation={barChartTitle}

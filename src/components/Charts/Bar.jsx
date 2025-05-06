@@ -14,6 +14,8 @@ import {
 import {
     ChartConfig,
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -23,14 +25,13 @@ export function BarChartComponent({
     title = "Bar Chart",
     description = "",
     data = [],
-    dataKey = "value",
+    config = {}, // Nova prop para configuração de múltiplas barras
     xAxisKey = "label",
-    color = "hsl(var(--chart-1))",
     footerText = "Showing data for the selected period",
     footerIcon = <TrendingUp className="h-4 w-4" />,
     footerSubtext = "",
-    decimalVariation = "0.00", // Nova prop para variação decimal
-    percentageVariation = "0%", // Nova prop para variação percentual
+    decimalVariation = "0.00",
+    percentageVariation = "0%",
 }) {
     const isPositive = parseFloat(decimalVariation) >= 0;
 
@@ -41,10 +42,10 @@ export function BarChartComponent({
                     <CardTitle className="text-lg font-bold">{title}</CardTitle>
                     <CardDescription className="text-sm text-muted-foreground">
                         {description}
-                        <div className="flex items-center gap-4 ">
+                        <div className="flex items-center gap-4">
                             <Badge
                                 variant={isPositive ? "success" : "destructive"}
-                                className="text-xs px-2 py-0.5" // Tamanho reduzido
+                                className="text-xs px-2 py-0.5"
                             >
                                 {isPositive ? (
                                     <TrendingUp className="h-4 w-4 mr-1" />
@@ -55,7 +56,7 @@ export function BarChartComponent({
                             </Badge>
                             <Badge
                                 variant={isPositive ? "success" : "destructive"}
-                                className="text-xs px-2 py-0.5" // Tamanho reduzido
+                                className="text-xs px-2 py-0.5"
                             >
                                 {isPositive ? (
                                     <TrendingUp className="h-4 w-4 mr-1" />
@@ -67,13 +68,9 @@ export function BarChartComponent({
                         </div>
                     </CardDescription>
                 </div>
-
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center">
-                <ChartContainer
-                    config={{ [dataKey]: { label: title, color } }}
-                    className="w-full h-full"
-                >
+                <ChartContainer config={config} className="w-full h-full">
                     <BarChart
                         accessibilityLayer
                         data={data}
@@ -94,14 +91,16 @@ export function BarChartComponent({
                             cursor={false}
                             content={<ChartTooltipContent hideLabel />}
                         />
-                        <Bar dataKey={dataKey} fill={color} radius={8}>
-                            <LabelList
-                                position="top"
-                                offset={12}
-                                className="fill-foreground"
-                                fontSize={12}
-                            />
-                        </Bar>
+                        <ChartLegend content={<ChartLegendContent />} />
+                        {Object.keys(config).map((key) => (
+                            <Bar
+                                key={key}
+                                dataKey={key}
+                                //stackId="a"
+                                fill={config[key].color}
+                            >
+                            </Bar>
+                        ))}
                     </BarChart>
                 </ChartContainer>
             </CardContent>
