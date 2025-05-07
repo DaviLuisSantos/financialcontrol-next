@@ -148,6 +148,17 @@ export default function DashboardPage() {
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Análise Gráfica</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <BarChartComponent
+            title="Lançamentos Mensais"
+            description="Fontes de receita"
+            data={barData}
+            config={chartConfig}
+            xAxisKey="mes"
+            footerText="Dados atualizados"
+            footerSubtext="Período: Últimos meses"
+            decimalVariation={barChartTitle}
+            percentageVariation={barChartDescription}
+          />
           <ReusablePieChart
             title="Despesas por Categoria"
             description="Distribuição das despesas do mês"
@@ -168,10 +179,6 @@ export default function DashboardPage() {
             decimalVariation={barChartTitle}
             percentageVariation={barChartDescription}
           />
-          <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">
-            <h2 className="text-lg font-semibold mb-4 text-[#ff79c6]">Saldo Semanal</h2>
-            <Line data={lineData} />
-          </div>
         </div>
       </section>
 
