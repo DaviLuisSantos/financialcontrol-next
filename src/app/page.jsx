@@ -7,41 +7,20 @@ import { ReusablePieChart } from '@/components/Charts/Pie';
 import { BarChartComponent } from '@/components/Charts/Bar';
 import { getToken } from '@/utils/auth';
 import { DashContext } from '@/contexts/DashboardContext';
-import { Line } from 'react-chartjs-2';
 import { DialogDemo } from '@/components/Modal';
-
-// Registrar os elementos necessários do Chart.js
-import {
-  Chart as ChartJS,
-  ArcElement,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(
-  ArcElement,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-);
 
 export default function DashboardPage() {
   const { user } = useContext(AuthContext);
   const { monthInfos } = useContext(DashContext);
   const router = useRouter();
 
-  const [barData, setBarData] = useState([]);
-  const [chartConfig, setChartConfig] = useState({});
   const [pieData, setPieData] = useState([]);
+  const [entriesBarData, setEntriesBarData] = useState([]);
+  const [entriesChartConfig, setEntriesChartConfig] = useState({});
   const [barChartTitle, setBarChartTitle] = useState('');
   const [barChartDescription, setBarChartDescription] = useState('');
+  const [balanceBarData, setBalanceBarData] = useState([]);
+  const [balanceChartConfig, setBalanceChartConfig] = useState({});
 
   useEffect(() => {
     if (!user && !getToken()) {
@@ -52,74 +31,52 @@ export default function DashboardPage() {
   useEffect(() => {
     if (monthInfos.monthBalance.length === 0) return;
 
-    // Formatar os dados para o gráfico de barras
-    const formattedBarData = monthInfos.monthBalance.map((item) => ({
+    const formattedBalanceData = monthInfos.monthBalance.map((item) => ({
       mes: item.mes,
       entrada: item.entrada,
       saida: item.saida,
       saldo: item.saldo,
     }));
-    setBarData(formattedBarData);
+    setBalanceBarData(formattedBalanceData);
 
-    // Configurar as cores e rótulos das barras
-    setChartConfig({
-      entrada: {
-        label: "Entradas",
-        color: "#4caf50",
-      },
-      saida: {
-        label: "Saídas",
-        color: "#f44336",
-      },
-      saldo: {
-        label: "Saldo",
-        color: "#2196f3",
-      },
+    setBalanceChartConfig({
+      entrada: { label: "Entradas", color: "#4caf50" },
+      saida: { label: "Saídas", color: "#f44336" },
+      saldo: { label: "Saldo", color: "#2196f3" },
     });
-
-    // Calcular variações para o título e descrição
-    if (monthInfos.monthBalance.length > 1) {
-      const lastMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 1].saldo;
-      const previousMonth = monthInfos.monthBalance[monthInfos.monthBalance.length - 2].saldo;
-      const decimalDifference = (lastMonth - previousMonth).toFixed(2);
-      const percentageDifference = ((decimalDifference / previousMonth) * 100).toFixed(2);
-
-      setBarChartTitle(decimalDifference);
-      setBarChartDescription(`${percentageDifference}%`);
-    }
   }, [monthInfos.monthBalance]);
 
   useEffect(() => {
     if (monthInfos.monthCategories.length === 0) return;
-    const formattedPieData = monthInfos.monthCategories?.map((item) => ({
+
+    const formattedPieData = monthInfos.monthCategories.map((item) => ({
       name: item.categoria,
       value: item.valor,
-    })) || [];
+    }));
     setPieData(formattedPieData);
   }, [monthInfos.monthCategories]);
 
-  const lineData = {
-    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-    datasets: [
-      {
-        label: 'Saldo Semanal (R$)',
-        data: [2000, 2500, 2200, 2700],
-        fill: false,
-        borderColor: '#50fa7b',
-        tension: 0.4,
-      },
-    ],
-  };
+  useEffect(() => {
+    if (!monthInfos.monthEntries || monthInfos.monthEntries.length === 0) return;
+
+    const formattedEntriesData = monthInfos.monthEntries.map((item) => ({
+      categoria: item.categoria,
+      valor: item.valor,
+    }));
+    setEntriesBarData(formattedEntriesData);
+
+    setEntriesChartConfig({
+      valor: { label: "Receitas", color: "#4caf50" },
+    });
+  }, [monthInfos.monthEntries]);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-3xl font-bold text-[#f8f8f2]">Dashboard</h1>
         <DialogDemo />
       </div>
 
-      {/* Resumo Financeiro */}
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Resumo Financeiro</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -144,20 +101,17 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Gráficos */}
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Análise Gráfica</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <BarChartComponent
-            title="Lançamentos Mensais"
-            description="Fontes de receita"
-            data={barData}
-            config={chartConfig}
-            xAxisKey="mes"
+          <BarChartComponent
+            title="Receitas por Categoria"
+            description="Distribuição das receitas do mês"
+            data={entriesBarData}
+            config={entriesChartConfig}
+            xAxisKey="categoria"
             footerText="Dados atualizados"
-            footerSubtext="Período: Últimos meses"
-            decimalVariation={barChartTitle}
-            percentageVariation={barChartDescription}
+            footerSubtext="Baseado nas categorias do mês"
           />
           <ReusablePieChart
             title="Despesas por Categoria"
@@ -171,18 +125,17 @@ export default function DashboardPage() {
           <BarChartComponent
             title="Lançamentos Mensais"
             description="Entradas, Saídas e Saldo"
-            data={barData}
-            config={chartConfig}
+            data={balanceBarData}
+            config={balanceChartConfig}
             xAxisKey="mes"
             footerText="Dados atualizados"
             footerSubtext="Período: Últimos meses"
-            decimalVariation={barChartTitle}
-            percentageVariation={barChartDescription}
+            //decimalVariation={barChartTitle}
+            //percentageVariation={barChartDescription}
           />
         </div>
       </section>
 
-      {/* Informações Adicionais */}
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Informações Adicionais</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -197,7 +150,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Últimos Lançamentos */}
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Últimos Lançamentos</h2>
         <div className="p-6 rounded-lg shadow-md bg-[#44475a] text-[#f8f8f2]">

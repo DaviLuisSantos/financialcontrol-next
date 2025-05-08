@@ -32,6 +32,7 @@ export function DashProvider({ children }) {
                 entriesChange: response?.receita?.diferenca || 0,
                 exitsChange: response?.despesa?.diferenca || 0,
                 balanceChange: response?.saldo?.diferenca || 0,
+                monthEntries: Array.isArray(response?.categoriasMensaisReceitas) ? response.categoriasMensaisReceitas : [],
                 monthBalance: Array.isArray(response?.saldoMensal) ? response.saldoMensal : [],
                 monthCategories: Array.isArray(response?.categoriasMensais) ? response.categoriasMensais : [],
             });
