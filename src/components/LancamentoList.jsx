@@ -1,7 +1,27 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getLancamentosByUsuario } from '@/services/lancamentoService';
 
-export default function LancamentoList({ lancamentos, isLoading }) {
+export default function LancamentoList({ isLoading: parentIsLoading }) {
+    const [lancamentos, setLancamentos] = useState([]);
+    const [isLoading, setIsLoading] = useState(parentIsLoading || true);
+
+    useEffect(() => {
+        const fetchLancamentos = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getLancamentosByUsuario();
+                setLancamentos(data);
+            } catch (error) {
+                console.error('Erro ao buscar lançamentos:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchLancamentos();
+    }, []);
+
     return (
         <div className="overflow-auto bg-[#282a36] rounded-lg shadow-lg mt-6">
             {isLoading ? (

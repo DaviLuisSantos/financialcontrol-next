@@ -8,6 +8,7 @@ import { BarChartComponent } from '@/components/Charts/Bar';
 import { getToken } from '@/utils/auth';
 import { DashContext } from '@/contexts/DashboardContext';
 import { DialogDemo } from '@/components/Modal';
+import LancamentoList from '@/components/LancamentoList';
 
 export default function DashboardPage() {
   const { user } = useContext(AuthContext);
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [barChartDescription, setBarChartDescription] = useState('');
   const [balanceBarData, setBalanceBarData] = useState([]);
   const [balanceChartConfig, setBalanceChartConfig] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!user && !getToken()) {
@@ -81,16 +83,16 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Resumo Financeiro</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ReusableCard
-            title="Saldo Atual"
-            description="Saldo disponível"
-            value={`R$ ${monthInfos.currentBalance}`}
-            badgeText={monthInfos.balanceChange}
-          />
-          <ReusableCard
             title="Total de Entradas"
             description="Entradas no mês"
             value={`R$ ${monthInfos.totalEntries}`}
             badgeText={monthInfos.entriesChange}
+          />
+          <ReusableCard
+            title="Saldo Atual"
+            description="Saldo disponível"
+            value={`R$ ${monthInfos.currentBalance}`}
+            badgeText={monthInfos.balanceChange}
           />
           <ReusableCard
             title="Total de Saídas"
@@ -104,14 +106,26 @@ export default function DashboardPage() {
       <section>
         <h2 className="text-2xl font-semibold text-[#f8f8f2] mb-4">Análise Gráfica</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <BarChartComponent
+          <ReusablePieChart
             title="Receitas por Categoria"
             description="Distribuição das receitas do mês"
             data={entriesBarData}
-            config={entriesChartConfig}
-            xAxisKey="categoria"
+            dataKey="valor"
+            nameKey="categoria"
             footerText="Dados atualizados"
             footerSubtext="Baseado nas categorias do mês"
+          />
+
+          <BarChartComponent
+            title="Lançamentos Mensais"
+            description="Entradas, Saídas e Saldo"
+            data={balanceBarData}
+            config={balanceChartConfig}
+            xAxisKey="mes"
+            footerText="Dados atualizados"
+            footerSubtext="Período: Últimos meses"
+          //decimalVariation={barChartTitle}
+          //percentageVariation={barChartDescription}
           />
           <ReusablePieChart
             title="Despesas por Categoria"
@@ -121,17 +135,6 @@ export default function DashboardPage() {
             nameKey="name"
             footerText="Dados atualizados"
             footerSubtext="Baseado nas categorias do mês"
-          />
-          <BarChartComponent
-            title="Lançamentos Mensais"
-            description="Entradas, Saídas e Saldo"
-            data={balanceBarData}
-            config={balanceChartConfig}
-            xAxisKey="mes"
-            footerText="Dados atualizados"
-            footerSubtext="Período: Últimos meses"
-            //decimalVariation={barChartTitle}
-            //percentageVariation={barChartDescription}
           />
         </div>
       </section>
@@ -160,6 +163,7 @@ export default function DashboardPage() {
           </ul>
         </div>
       </section>
+      <LancamentoList isLoading={isLoading} />
     </div>
   );
 }

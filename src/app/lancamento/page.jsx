@@ -19,19 +19,6 @@ export default function LancamentosPage() {
             return;
         }
 
-        const fetchLancamentos = async () => {
-            setIsLoading(true);
-            try {
-                const data = await getLancamentosByUsuario();
-                setLancamentos(data);
-            } catch (error) {
-                console.error('Erro ao buscar lançamentos:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchLancamentos();
     }, [user]);
 
     const handleCriar = async (dados) => {
@@ -55,7 +42,7 @@ export default function LancamentosPage() {
 
             <LancamentoForm onCriar={handleCriar} />
             <div className="flex-1 overflow-hidden">
-                <LancamentoList lancamentos={lancamentos} isLoading={isLoading} />
+                <LancamentoList isLoading={isLoading} />
             </div>
         </div>
     );
