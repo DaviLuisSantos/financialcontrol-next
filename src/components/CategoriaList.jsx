@@ -21,7 +21,7 @@ export default function CategoriaList({ categorias, isLoading }) {
                             <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() => alert(`Excluir categoria: ${categoria.nome}`)} // Substitua por lógica real
+                                onClick={() => alert(`Excluir categoria: ${categoria.nome}`)}
                             >
                                 Excluir
                             </Button>

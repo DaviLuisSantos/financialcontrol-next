@@ -31,3 +31,23 @@ export const getLancamentosByUsuario = async () => {
         throw error;
     }
 }
+
+export const updateLancamento = async (lancamentoId, lancamento) => {
+    try {
+        const response = await apiClient.put(`${API_ENDPOINT}/${lancamentoId}/`, lancamento);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating lancamento:", error);
+        throw error;
+    }
+}
+
+export const deleteLancamentoById = async (lancamentoId) => {
+    try {
+        const response = await apiClient.delete(`${API_ENDPOINT}/${lancamentoId}/`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting lancamento:", error);
+        throw error;
+    }
+}
